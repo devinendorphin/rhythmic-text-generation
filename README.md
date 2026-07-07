@@ -60,6 +60,23 @@ fp = RhythmicFingerprint()
 fp.compare(human_poem, llm_poem)["largest_differences"]
 ```
 
+### Analyzing model extracts
+
+`examples/analyze_extract.py` runs the full toolkit over a generated sample —
+whole and sliced into named line-range segments (e.g. distinct generation
+regimes) — printing a metric table against the verse/prose baselines plus
+fingerprint similarities:
+
+```bash
+python examples/analyze_extract.py sample.txt -s "word_salad:105-143" -s "coherent:286-350"
+```
+
+Applied to a Llama 3.1 405B base-model extract, this workflow showed that
+degeneration into nonce-word salad is rhythmically *hyper-regular*, not
+noisy — nPVI drops below metrical verse, stress density approaches 0.8, and
+the invented words keep English onset statistics: phonotactics and pulse
+survive the collapse of semantics.
+
 ## Research uses
 
 - **Corpus contrasts**: fingerprint human poetry vs. LLM poetry vs. prose and
