@@ -77,6 +77,32 @@ noisy — nPVI drops below metrical verse, stress density approaches 0.8, and
 the invented words keep English onset statistics: phonotactics and pulse
 survive the collapse of semantics.
 
+### Analyzing interactive completion logs
+
+`examples/analyze_completion_log.py` handles the other common shape of model
+output: a log of an interactive writing session, where the same seed prompt is
+run as repeated takes under varying sampling parameters and each continuation is
+kept or rerolled by hand.
+
+```bash
+python examples/analyze_completion_log.py log.json          # one session
+python examples/analyze_completion_log.py log*.json         # pooled
+```
+
+It recovers the take structure, labels kept vs. rerolled continuations,
+correlates every rhythm metric against temperature *and* top_p with each
+controlled for the other, and prints a **shuffle control** — the same words in
+scrambled order at identical line lengths. Metrics that beat their own shuffled
+baseline reflect word order; metrics that don't are properties of the word bag.
+Don't report a rhythm result on generated text without that control.
+
+Applied to `davinci-002` creative sessions, it found a passage where the model
+fell into song mode and scored as verse (metricality 0.72 vs. Sonnet 18's 0.76,
+periodicity 5× its own shuffled baseline) while being semantically incoherent
+with 99.9% dictionary coverage and *zero* 4-gram repetition — and found that
+top_p, not temperature, is the parameter that moves the text. See
+[`findings/davinci-002-creative-tests.md`](findings/davinci-002-creative-tests.md).
+
 ## Research uses
 
 - **Corpus contrasts**: fingerprint human poetry vs. LLM poetry vs. prose and
