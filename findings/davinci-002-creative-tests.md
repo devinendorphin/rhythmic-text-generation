@@ -19,13 +19,23 @@ rerolled by hand. That structure is what makes the rest of this measurable.
 
 ---
 
-## 1. The headline: davinci-002 fell into verse and could not get out
+## 1. The headline: davinci-002 fell into verse
 
 At generation 121 of `B_akashic` (T=1.85, top_p=0.90) the model emitted a `♪`.
-It never emitted anything else again. All 12 remaining generations of the session
-stayed inside song mode; **81% of that session's final text (5,700 of 7,043
-chars) sits after the first note character.** The prompt going *in* to gen 121
-contained no `♪`.
+All 12 remaining generations of the session stayed inside song mode; **81% of
+that session's final text (5,700 of 7,043 chars) sits after the first note
+character.** The prompt going *in* to gen 121 contained no `♪`.
+
+> **Confound: this is not evidence that the model *couldn't* leave.** Every one
+> of those 12 note-bearing generations was kept — not one was ever rerolled. So
+> "the attractor captured the model" and "the human liked it and kept feeding it
+> back" predict the identical log, and this session cannot separate them. TTS
+> was on at rate 0.5 (half speed) throughout, which is a close-listening
+> setting; a metrically regular lyric passage is exactly what would sound good
+> that way. Persistence is a claim the probe grid has to earn, by generating
+> from a `♪` seed with no human in the loop and measuring how many generations
+> it takes to fall out. Everything below about the passage's *rhythm* stands
+> independently — it is measured on the text, not on its persistence.
 
 Measured against the repo's own baselines:
 

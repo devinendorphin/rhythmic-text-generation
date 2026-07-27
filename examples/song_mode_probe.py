@@ -1,9 +1,16 @@
 """Prompt grid for chasing the davinci-002 song-mode attractor.
 
 Background: in one session davinci-002 emitted a lone `♪` mid-generation and
-never left song mode again — 81% of the resulting text, scoring as verse
-(metricality 0.724 against Sonnet 18's 0.758) while semantically incoherent.
-See findings/davinci-002-creative-tests.md.
+every generation after it stayed in song mode — 81% of the resulting text,
+scoring as verse (metricality 0.724 against Sonnet 18's 0.758) while
+semantically incoherent. See findings/davinci-002-creative-tests.md.
+
+Note that all 12 of those generations were *kept* — none was rerolled — so that
+session cannot distinguish an attractor the model could not leave from a
+passage the human liked and kept feeding back. Persistence is therefore
+something this grid has to measure, not assume: run each firing cell forward
+several generations with nothing rejected, and record how many it takes to fall
+out of song mode. That number is the actual attractor strength.
 
 That was one accident at T=1.85 / top_p=0.90. This grid turns it into a
 measurement. It is built to separate two explanations that predict the same
@@ -50,7 +57,11 @@ import json
 # The setting at which the attractor was observed. Hold it fixed for pass 1.
 OBSERVED = {"temperature": 1.85, "top_p": 0.90, "max_tokens": 150}
 
-SUGGESTED_N = 8
+# Hand-driven in a completion console, an ear is the detector: song mode is
+# audible in one generation, so cells need only enough output to clear the
+# 60-word measurement floor. At max_tokens=150 (~110 words) three generations
+# per cell is ample, which puts the whole grid at ~36 generations.
+SUGGESTED_N = 3
 
 # Run in two passes so a fragile effect costs almost nothing to rule out.
 #
