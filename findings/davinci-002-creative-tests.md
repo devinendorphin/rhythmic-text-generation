@@ -83,6 +83,49 @@ Three collapses, three different signatures:
 (T=1.0, top_p=1.0). Rhythmically it is unremarkable; its tell is the repetition
 rate.
 
+### What the song passage's register actually is
+
+The `♪` arrived immediately after a sign-off — "Peace. I'm outta here." — which
+is exactly where an outro-music caption goes, and the output is pop pastiche
+including a near-quotation of Madonna ("baby please don't preach") and *You Are
+My Sunshine*. `♪ ... ♪` is the subtitle convention for sung lyrics. So the
+likeliest reading is not that the model discovered verse but that it switched
+into **closed-caption register**, and the metricality measured above belongs to
+pop song lyrics as they appear in subtitle corpora.
+
+**A line-length test was tried against this and is withdrawn.** The reasoning
+was: subtitle lines cap near 42 characters, these run to 93, so it isn't
+captions. Two things are wrong with it.
+
+1. **Wrong unit.** What was measured is the `♪`-to-`♪` span, not the display
+   line. In real caption files a long lyric is hard-wrapped across two display
+   lines *inside* one note-delimited span, so a 46-character mean span is fully
+   compatible with a 42-character display cap. The comparison never tested what
+   it claimed to.
+2. **Wrong model of the model.** These systems synthesize registers rather than
+   reproduce them, and a blend does not inherit either parent's hard
+   constraints — it stretches the form. Exceeding a cap is what a blend of
+   caption-lyric and surrounding monologue register would be *expected* to do.
+
+Measured properly, the evidence now points the other way:
+
+- **Form drift.** Mean span length across the passage's four quartiles runs
+  **37.9 → 47.1 → 48.3 → 49.7** characters, and the share under the 42-char cap
+  falls **63% → 33% → 26% → 44%**. The passage *enters* caption-shaped and
+  stretches as it goes. That is the blend visible as a time series, and it is
+  the opposite of evidence against caption register.
+- **Empty music spans.** The model emits `♪♪` enclosing nothing — 5 note-runs of
+  four or more glyphs, beyond the two-glyph join that ordinary delimiting
+  produces. In captions that marks an instrumental passage with no lyrics. It
+  has the convention, not just the glyph.
+- **No other caption furniture.** Zero `[LAUGHTER]`-style bracket cues, zero
+  speaker dashes or `>>`. It borrowed the music convention specifically rather
+  than transcript register wholesale — again what blending predicts, and not
+  what wholesale reproduction would.
+
+Line geometry is not a discriminator here. `caption_furniture()` and
+`form_drift()` in the analyzer are.
+
 So the standing finding — *degeneration is hyper-regular, not noisy* —
 **replicates on a second model and a second mechanism**, but "hyper-regular"
 resolves into at least two distinct things. Llama collapsed into **phonotactic**

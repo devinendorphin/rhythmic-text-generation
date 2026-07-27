@@ -19,10 +19,19 @@ single observation:
 
 H2 is the better fit for what actually happened: the trigger came directly after
 a sign-off ("Peace. I'm outta here.") — exactly where an outro-music caption
-goes — and the output is pop pastiche, including a near-quotation of Madonna
-("baby please don't preach"). But line geometry does *not* support it: the lines
-run to 93 characters, past any subtitle cap. So it is a live hypothesis, not a
-conclusion, which is what the grid is for.
+goes — the output is pop pastiche including a near-quotation of Madonna, the
+model emits empty `♪♪` spans (the caption marker for an instrumental passage),
+and span length drifts 37.9 → 49.7 characters across the passage, entering
+caption-shaped and stretching toward the surrounding prose.
+
+An earlier line-length argument against H2 is withdrawn: it compared
+note-delimited spans to subtitle *display* lines, which are hard-wrapped inside
+those spans, and it assumed a blend would inherit a hard constraint from one
+parent. Do not reintroduce it. See findings/davinci-002-creative-tests.md.
+
+H2 still is not established — none of this rules out H1, because every cell so
+far comes from a single unreplicated event at one sampling setting. That is what
+the grid is for.
 
 Run every cell at the setting where the attractor actually fired, then ladder
 only the cells that fire.

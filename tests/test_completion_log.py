@@ -136,3 +136,38 @@ def test_report_by_prompt_groups_and_runs(capsys):
     out = capsys.readouterr().out
     assert "by prompt cell (n=2)" in out
     assert "seed one" in out and "seed two" in out
+
+
+def test_caption_furniture_ignores_ordinary_delimiter_joins():
+    """`♪ a ♪ ♪ b ♪` produces a two-glyph run at the join and must not be
+    counted as an instrumental marker; a genuine empty `♪♪` pair must be."""
+    plain = "♪ first line ♪ ♪ second line ♪ ♪ third line ♪"
+    assert acl.caption_furniture(plain)["empty_music_spans"] == 0
+    assert acl.caption_furniture(plain)["note_glyphs"] == 6
+
+    with_instrumental = "♪ first line ♪ ♪♪ ♪ second line ♪"
+    assert acl.caption_furniture(with_instrumental)["empty_music_spans"] == 1
+
+
+def test_caption_furniture_counts_other_apparatus():
+    text = "[LAUGHTER]\n- Who's there?\n>> ANNOUNCER: welcome back\n"
+    found = acl.caption_furniture(text)
+    assert found["bracket_cues"] == 1
+    assert found["speaker_tags"] == 2
+    assert found["note_glyphs"] == 0
+
+
+def test_form_drift_detects_a_stretching_form():
+    short_then_long = "\n".join(["ab"] * 12 + ["abcdefghij" * 2] * 12)
+    drift = acl.form_drift(short_then_long)
+    assert len(drift) == 4
+    assert drift[0] < drift[-1]
+
+
+def test_form_drift_flat_on_uniform_lines():
+    drift = acl.form_drift("\n".join(["abcde"] * 40))
+    assert len(set(drift)) == 1
+
+
+def test_form_drift_needs_enough_lines():
+    assert acl.form_drift("a\nb\nc") == []

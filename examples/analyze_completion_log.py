@@ -42,6 +42,7 @@ import json
 import math
 import pathlib
 import random
+import re
 import statistics
 import sys
 
@@ -96,6 +97,50 @@ def repeated_ngram_rate(text: str, n: int = 4) -> float:
         " ".join(words[i:i + n]) for i in range(len(words) - n + 1)
     )
     return sum(c - 1 for c in grams.values() if c > 1) / len(grams)
+
+
+def caption_furniture(text: str) -> dict:
+    """Count closed-caption conventions — register evidence that line geometry
+    cannot give you.
+
+    The useful signal is ``empty_music_spans``: a note pair enclosing nothing
+    (``♪♪``), which in real captions marks an instrumental passage with no
+    lyrics. A model that emits those has the convention, not just the glyph.
+    Note that ordinary ``♪ lyric ♪ ♪ lyric ♪`` delimiting produces runs of two
+    at every join, so only runs of four or more are informative.
+
+    ``bracket_cues``/``speaker_tags`` are the *rest* of the caption apparatus.
+    Their absence alongside heavy note use is itself a result: it says the model
+    borrowed the music convention specifically rather than transcript register
+    wholesale.
+    """
+    note = "♪"
+    runs = re.findall(rf"(?:{note}[ ]*)+", text)
+    lengths = [r.count(note) for r in runs]
+    return {
+        "note_glyphs": text.count(note),
+        "note_runs": len(runs),
+        # each empty ♪♪ pair adds two glyphs beyond the two-glyph join
+        "empty_music_spans": sum(1 for n in lengths if n >= 4),
+        "bracket_cues": len(re.findall(r"\[[A-Z][A-Z ]{2,}\]", text)),
+        "speaker_tags": len(re.findall(r"^\s*(?:-\s|>>)", text, re.M)),
+    }
+
+
+def form_drift(text: str, quantiles: int = 4) -> list[float]:
+    """Mean line length across successive slices of a passage.
+
+    A register entered cleanly and then pulled toward its surroundings shows a
+    monotone trend here. That is the measurable form of "the model is blending,
+    and the blend stretches the form" — and it is why a single mean line length
+    is not evidence about which register the text came from.
+    """
+    lines = [len(l) for l in text.splitlines() if l.strip()]
+    if len(lines) < quantiles * 3:
+        return []
+    size = len(lines) // quantiles
+    return [round(statistics.mean(lines[i * size:(i + 1) * size]), 1)
+            for i in range(quantiles)]
 
 
 def measure(text: str) -> dict | None:
