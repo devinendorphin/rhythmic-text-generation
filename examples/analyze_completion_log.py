@@ -294,15 +294,52 @@ def report_correlations(records: list[dict]) -> list[dict]:
     return rows
 
 
+def report_by_prompt(records: list[dict], head: int = 40) -> None:
+    """Group generations by seed prompt and score each cell against its shuffle.
+
+    For prompt-grid experiments (see song_mode_probe.py): pools all output for a
+    given seed, then reports the metrics beside the same words scrambled. A cell
+    has only produced a rhythm effect if it beats its own shuffled baseline.
+    """
+    cells = collections.defaultdict(list)
+    for record in records:
+        for gen in record["generations"]:
+            cells[gen["prompt"][:head]].append(gen["output"])
+
+    print(f"\n=== by prompt cell (n={len(cells)}) ===")
+    print(f"{'seed prompt':<42}{'gens':>5}{'words':>7}{'cov':>7}"
+          f"{'metr':>7}{'d_metr':>8}{'nPVI':>7}{'d_nPVI':>8}{'per_str':>9}")
+    for seed, outputs in sorted(cells.items(), key=lambda kv: -len(kv[1])):
+        text = "\n".join(outputs)
+        row = measure(text)
+        if row is None:
+            continue
+        control = measure(shuffle_control(text))
+        label = seed.replace("\n", "\\n")[:40]
+        print(f"{label:<42}{len(outputs):>5}{row['words']:>7}{row['cov']:>7.3f}"
+              f"{row['metricality']:>7.3f}"
+              f"{row['metricality'] - control['metricality']:>+8.3f}"
+              f"{row['npvi_inter_stress']:>7.1f}"
+              f"{row['npvi_inter_stress'] - control['npvi_inter_stress']:>+8.1f}"
+              f"{row['periodicity_strength']:>9.3f}")
+    print("d_ columns are the cell minus its own shuffled words: the part "
+          "attributable to word order.")
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("logs", nargs="+", type=pathlib.Path)
     parser.add_argument("--per-generation", action="store_true",
                         help="dump per-generation metrics as JSON")
+    parser.add_argument("--by-prompt", action="store_true",
+                        help="group by seed prompt and score each cell against "
+                             "its shuffled baseline (for prompt grids)")
     args = parser.parse_args(argv)
 
     records = load_runs(args.logs)
     report_runs(records)
+    if args.by_prompt:
+        report_by_prompt(records)
     rows = report_correlations(records)
 
     print("\n=== shuffle control on the final text of each log ===")

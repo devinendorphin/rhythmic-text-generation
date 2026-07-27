@@ -116,3 +116,23 @@ def test_partial_correlation_removes_a_confound():
     # take x's apparent correlation with y to (near) zero.
     assert acl.partial(0.5, 0.7, 0.7) == pytest.approx(0.02, abs=0.02)
     assert acl.partial(0.5, 0.0, 0.0) == pytest.approx(0.5)
+
+
+def test_report_by_prompt_groups_and_runs(capsys):
+    """Cells are grouped by seed prefix, and each is scored against its own
+    shuffle — the d_ columns are the point of the report."""
+    body = SONNET + " " + SONNET
+    records = [{
+        "source": "grid", "index": 0, "temperature": 1.0, "top_p": 1.0,
+        "grown": 0,
+        "generations": [
+            {"prompt": "seed one", "output": body,
+             "params": {"temperature": 1.0, "top_p": 1.0}, "kept": None},
+            {"prompt": "seed two", "output": body,
+             "params": {"temperature": 1.0, "top_p": 1.0}, "kept": None},
+        ],
+    }]
+    acl.report_by_prompt(records)
+    out = capsys.readouterr().out
+    assert "by prompt cell (n=2)" in out
+    assert "seed one" in out and "seed two" in out
