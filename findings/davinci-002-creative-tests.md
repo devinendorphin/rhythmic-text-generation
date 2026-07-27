@@ -209,11 +209,56 @@ Llama result, arrived at down a completely different road.
 
 ---
 
+---
+
+## 5. Probe pass 0: the attractor did not reproduce (2026-07-27)
+
+Ran the positive control — the sign-off text with a `♪` appended, T=1.85 /
+top_p=0.90 / max_tokens=150, three fresh seeds — against the prose floor.
+
+| cell | words | cov | d_metricality | nPVI | per_str |
+|---|---|---|---|---|---|
+| signoff + `♪` (3 fresh seeds) | 309 | 0.942 | **+0.015** | 44.0 | 0.063 |
+| prose_control | 335 | 0.925 | **+0.015** | 42.8 | 0.060 |
+| *original song mode, for reference* | *1039* | *0.999* | *+0.061* | *40.2* | *0.199* |
+
+**The seed cell and the floor are identical.** No effect. Pass 1 was not run.
+
+What the three seeds actually produced: one single lyric line —
+`Well if you wanna touch me baby♪` — which **closed the caption span and
+immediately exited** into blog spam; then a music-scene blog post (venue
+listings, tribute show — music-adjacent, not lyrics); then a political rant.
+Continuations degenerated into real-word salad, the ordinary T=1.85 mode from
+the earlier sessions. A separate 54-generation chain from an unrelated joke
+premise, same session, contains **zero** note glyphs and scores d_metricality
+−0.006 — below its own shuffled baseline.
+
+That first generation is the informative one: the model treated `♪` as **a
+bracket to close, not a register to inhabit**. This cuts against the simple
+form of the caption hypothesis (marker as switch) and equally against verse
+mode (T=1.85 gave word salad and blog spam, not metrical language).
+
+**What the null does not cover.** In the original event the model emitted the
+`♪` *itself*, after a sign-off it had written, inside 1,343 characters of
+context it had built. Here it was handed a glyph cold and asked to continue
+past it. Those are different experiments, and only the second is ruled out.
+
+The outstanding test is therefore a straight replication: seed
+`examples/extracts/davinci002_prose_head.txt` verbatim — the actual original
+context, ending at "Peace. I'm outta here." — with **no** `♪`, and see whether
+the model puts one there on its own. If it does, context depth is the variable
+and the grid returns with longer seeds. If it does not in five tries, the
+original was a one-off that its own context does not reproduce, which is itself
+a result about how fragile these register shifts are.
+
+---
+
 ## What to do next
 
-1. **Chase the song attractor deliberately.** It fired once, unprompted, at
-   T=1.85/p=0.90. Seed `♪` directly at a grid of temperatures and see whether the
-   metrical scores hold — that turns one striking observation into a measurement.
+1. **Replicate before elaborating.** Seeding `♪` cold does not reproduce the
+   attractor (§5). Seed the original context instead and see whether the model
+   emits the glyph itself. Everything else in the probe grid is downstream of
+   that answer.
 2. **Break the confound.** The ladder moved temperature and top_p together. A
    proper 2-D grid would settle whether temperature does anything to rhythm at
    all once nucleus width is held fixed.
