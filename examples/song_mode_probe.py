@@ -50,8 +50,18 @@ import json
 # The setting at which the attractor was observed. Hold it fixed for pass 1.
 OBSERVED = {"temperature": 1.85, "top_p": 0.90, "max_tokens": 150}
 
-# Suggested pass 1: every cell, n=8, at OBSERVED. ~15 minutes of generations.
 SUGGESTED_N = 8
+
+# Run in two passes so a fragile effect costs almost nothing to rule out.
+#
+# Pass 0 (2 cells, ~16 generations): signoff_then_note + prose_control. The
+#   first replicates the conditions the attractor was actually observed under
+#   and is the positive control; the second is the floor. If pass 0 does not
+#   produce song mode, stop — there is nothing for the rest of the grid to
+#   measure.
+# Pass 1 (the rest): only if pass 0 fires. This is where bare_note and
+#   music_bracket earn their keep by separating token from convention.
+PASS_0 = ("signoff_then_note", "prose_control")
 
 SIGNOFF = ("Well that's my show for the day. As for me, don't bother trying to "
            "connect me on Facebook, this stuff sucks. Peace. I'm outta here.\n")
@@ -80,6 +90,15 @@ GRID = [
     ("note_variant", "♫",
      "The other music glyph. If ♪ fires and ♫ doesn't, the effect is "
      "token-specific rather than convention-specific."),
+
+    ("cue_stack", "[MUSIC PLAYING] ♪",
+     "Both cues at once — the ceiling to read bare_note and music_bracket "
+     "against. Confounded on its own: it cannot say which cue fired, which is "
+     "exactly what those two cells exist to answer. Note it is also mildly "
+     "off-distribution — in real captions the bracket cue marks instrumental "
+     "music and the note pair marks transcribed lyrics, so they are "
+     "alternatives rather than neighbours, and stacking them may weaken the "
+     "cue rather than strengthen it."),
 
     # --- C. context: does the caption slot matter? ---
     ("signoff_then_note", SIGNOFF + "♪",
@@ -121,20 +140,24 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({
             "params": OBSERVED,
             "n_per_cell": SUGGESTED_N,
-            "cells": [{"name": n, "prompt": p, "rationale": r}
+            "pass_0": list(PASS_0),
+            "cells": [{"name": n, "prompt": p, "rationale": r,
+                       "pass": 0 if n in PASS_0 else 1}
                       for n, p, r in GRID],
         }, indent=1, ensure_ascii=False))
         return 0
 
     print(f"song-mode probe — {len(GRID)} cells x n={SUGGESTED_N} "
           f"at {OBSERVED}\n")
+    print(f"Pass 0 first ({', '.join(PASS_0)}) — if it doesn't fire, stop.\n")
     print("Score with:  python examples/analyze_completion_log.py "
           "out.json --by-prompt")
     print("Read metricality, nPVI and periodicity_strength against the "
           "prose_control row,\nand read every one of them against its own "
           "shuffled baseline.\n")
     for name, prompt, rationale in GRID:
-        print(f"--- {name} ---")
+        marker = "  [PASS 0]" if name in PASS_0 else ""
+        print(f"--- {name} ---{marker}")
         print(f"    {rationale}")
         print(f"    prompt: {prompt!r}\n")
     return 0
