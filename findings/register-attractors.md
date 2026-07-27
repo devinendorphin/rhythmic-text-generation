@@ -5,6 +5,11 @@ Separate from the song-mode work. Same model (`davinci-002`), same console, log
 
 > `Three Salafi lesbians walk into a bar,`
 
+> **Status: one observation, not replicated.** A follow-up of 46 generations —
+> 31 of them fresh from this identical seed — produced zero register markers.
+> The passage below is real and the quotes are verbatim, but nothing here
+> establishes that the seed causes it. See "It did not replicate" below.
+
 ## The joke frame never engages
 
 Across all 54 generations: **zero** occurrences of "bartender", zero punchlines,
@@ -54,8 +59,8 @@ built from.
 | `C_sunday` | 16,044 | 0.37 | **0.00** |
 
 **Zero register markers across 44,023 words** of other davinci-002 output from
-the same model, same human, adjacent sessions. The effect is not a property of
-the model at these settings; it is specific to this seed.
+the same model, same human, adjacent sessions. So the register is real and
+locatable — but see the next section before believing anything about *why*.
 
 Reproduce with `examples/register_markers.py`.
 
@@ -67,22 +72,70 @@ The controls are — and they are 0.00 either way, before and after the list gre
 A number that only moves on the passage you built the list from is telling you
 about your list.
 
-## Why: the topical prior beats the frame
+## It did not replicate, and it is not the seed (2026-07-27, log `dc9155eb`)
 
-The seed is four words of joke frame ("walk into a bar") carrying a strong
-topical conjunction (Salafism + lesbians). In web text that conjunction is
-heavily concentrated in one discourse — counter-jihad blogs arguing about Islam
-and LGBT rights — so the highest-probability continuation region for those two
-topics together *is* that comment section. The joke frame is weak and loses.
+46 further generations, including 31 fresh from the identical bare seed:
+**zero register markers across 4,015 words.** Every one of the six
+register-bearing generations in the corpus comes from the original run.
 
-This predicts two cheap tests, neither run yet:
+The proposed mechanism above — "the topical prior beats the joke frame" — is
+therefore **withdrawn as untested**. So are the two frame-manipulation results,
+for a reason worth recording: the bartender cue (3 generations, 306 words) and
+`Salman Rushdie's ...` (7, 591 words) both scored 0.00, but so did the
+unmodified seed. There was no baseline to move. Those cells tested nothing, and
+proposing them as single-shot probes was the design error — see below.
 
-1. **Strengthen the frame.** Seed `Three Salafi lesbians walk into a bar. The
-   bartender says,` — an explicit structural cue. If the attractor weakens, the
-   competition between frame and topic is the mechanism.
-2. **Remove the frame.** Seed `An article about Salafism and LGBT communities:`
-   with no joke at all. If it lands in the same comment section, the joke frame
-   was never doing anything and the topic alone carries it.
+What actually predicts the register is **depth of accumulated context**, not the
+seed:
+
+| chars of context accumulated | gens | words | register / 1k |
+|---|---|---|---|
+| 0 (fresh seed) | 31 | 2,849 | 0.35 |
+| 1–1,000 | 26 | 2,064 | 0.48 |
+| 1,000–2,000 | 14 | 1,378 | 0.00 |
+| **2,000+** | 22 | 1,908 | **5.24** |
+
+All of the 2,000+ mass is four generations of one chain at T=0.95, at depths
+2,491 / 3,229 / 3,988 / 4,689 characters. One run, never repeated. The table
+above should not be read as a dose-response curve — it is one trajectory
+plotted against its own length.
+
+An earlier version of this file reported the new log as replicating at 5.24/1k.
+It does not: the new export contains the old generations, so that number was the
+original four counted twice. Caught only by checking timestamps against the
+previous log.
+
+### What would actually test it
+
+Not single-shot prompts. Run **five independent chains from the bare seed at
+T=0.95, each carried to 4,000+ characters, rerolling nothing**, and measure
+register markers per chain. That is the only design that matches the conditions
+under which the effect was ever seen. If two or three of five chains land in the
+same discourse, the attractor is real and common; if none do, one run out of
+seven is a coincidence worth dropping.
+
+## The pattern across both nulls
+
+This is the second attractor in this corpus to appear deep in an accumulating
+chain and then fail to reproduce from a cold seed. Song mode did the same
+(`davinci-002-creative-tests.md` §5): fired once at generation 121 inside 1,343
+characters of self-built context, and produced nothing at all when its
+apparent trigger was supplied as a fresh prompt.
+
+Both times the "trigger" was identified by looking backwards from the effect —
+a `♪` glyph, a joke seed naming two topics — and both times it turned out to be
+**a correlate of a trajectory state rather than a cause of it**. That is now
+two for two, from independent phenomena, and it is the most portable thing this
+session produced:
+
+> In interactive base-model use, register attractors look like properties of
+> the trajectory, not of the prompt. Probing them with single-shot prompts is
+> the wrong instrument, and will return nulls whether or not the effect is real.
+
+It also explains why both probe designs failed. Both were built to isolate a
+trigger, and neither could reach the depth at which either effect has ever been
+observed. Future probes here should hold the seed fixed and vary *chain depth*,
+with nothing rerolled.
 
 ## The temperature inversion
 
@@ -103,6 +156,7 @@ Coverage in the Salafi chain by temperature: 0.951 at T≤1.1, 0.927 at 1.2–1.
 0.874 at 1.5–1.7. The register dissolves as temperature rises — the opposite of
 song mode's behaviour.
 
-Two events is not a law. But it is a sharp, testable claim about where to look
-for each kind of attractor, and it is the first thing in this repo that connects
-the rhythm work to what the model is actually *saying*.
+Two events is not a law, and with both now failing to reproduce on demand it is
+less than that — a pattern in two unreplicated observations. It is recorded
+because it is cheap to test with the chain-depth design above, not because it is
+established.

@@ -243,6 +243,13 @@ mode (T=1.85 gave word salad and blog spam, not metrical language).
 context it had built. Here it was handed a glyph cold and asked to continue
 past it. Those are different experiments, and only the second is ruled out.
 
+**This null has since been joined by a second of the same shape** — the register
+attractor in `register-attractors.md` also appeared deep in an accumulating
+chain and also produced nothing from a cold seed. Two for two suggests these are
+trajectory properties rather than prompt properties, and that single-shot probes
+are the wrong instrument for both. Probe designs here should hold the seed fixed
+and vary chain depth, rerolling nothing.
+
 The outstanding test is therefore a straight replication: seed
 `examples/extracts/davinci002_prose_head.txt` verbatim — the actual original
 context, ending at "Peace. I'm outta here." — with **no** `♪`, and see whether
