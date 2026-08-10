@@ -9,21 +9,30 @@ phonological core.
 
 ## Repo-specific discipline
 
-- **Run the tests:** `pip install -e ".[dev]" && python -m pytest tests/` (18 sanity tests
+- **Run the tests:** `pip install -e ".[dev]" && python -m pytest tests/` (42 tests
   against canonical texts). A new tool needs tests against a text whose answer is known.
 - **Keep the interface uniform.** Every tool takes text, returns a dict, emits JSON from the
   CLI. That uniformity is what makes `RhythmicFingerprint` possible.
 - **Phonemes, not spelling.** Rhyme and alliteration are computed on pronunciation —
   "known"/"night" alliterate, "cat"/"city" don't. Any shortcut back to orthography is a bug.
-- **Report `dictionary_backed`.** Out-of-vocabulary words fall back to letter heuristics;
-  coverage must stay visible.
+- **Report `dictionary_coverage`, not just `dictionary_backed`.** The latter only says
+  CMUdict is installed — it reads `True` for pure noise. Coverage of *the measured text* is
+  what qualifies a number: OOV words fall back to letter heuristics that floor at one
+  syllable with an alternating 1-0 stress guess, so low-coverage text reports the fallback's
+  rhythm, not its own. Random consonant strings score a perfect pulse. Check it first.
 - **Don't overclaim against acoustics.** These are text-based proxies for acoustic
   phenomena. nPVI here uses counts, not durations — compare within this toolkit, not against
   acoustic studies.
 
-> Standing finding worth not losing: applied to a Llama 3.1 405B base extract, degeneration
-> into nonce-word salad is rhythmically *hyper-regular*, not noisy. Phonotactics and pulse
-> survive the collapse of semantics.
+> Standing finding, **substantially corrected 2026-08-10** — read `FINDINGS.md` before
+> citing it. The old claim ("degeneration into nonce-word salad is rhythmically
+> *hyper-regular*; phonotactics and pulse survive the collapse of semantics") was measured
+> through the OOV fallback. Random consonant strings — no language at all — post
+> `stress_density 1.0, nPVI 0.0, entropy 0.0`, a *perfect* pulse. Across 350 davinci-002
+> generations, `r(coverage, stress_density) = -0.81`: the "pulse" tracks how many words
+> CMUdict missed. Hold coverage at ceiling and the stress-density effect vanishes
+> (`r = -0.01`). What survives is smaller and real: nPVI still falls with temperature among
+> fully in-vocabulary text (`r = -0.26`), never dropping below the metrical-verse baseline.
 
 ## The harness
 

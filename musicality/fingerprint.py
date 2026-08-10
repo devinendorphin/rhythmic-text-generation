@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from math import sqrt
 
+from . import phonology
 from .alliteration import AlliterationAnalyzer
 from .cadence import CadenceAnalyzer
 from .euphony import EuphonyScorer
@@ -59,6 +60,7 @@ class RhythmicFingerprint:
         return {
             "features": {k: round(v, 4) for k, v in vector.items()},
             "dimensions": len(vector),
+            "dictionary_coverage": phonology.coverage(text),
         }
 
     def vector(self, text: str) -> dict[str, float]:
@@ -94,4 +96,9 @@ class RhythmicFingerprint:
             "largest_differences": deltas[:5],
             "vector_a": {k: round(v, 4) for k, v in va.items()},
             "vector_b": {k: round(v, 4) for k, v in vb.items()},
+            # A similarity between a low-coverage text and a real one compares
+            # the fallback against pronunciation. Check these before reading
+            # the cosine as a claim about rhythm.
+            "dictionary_coverage_a": phonology.coverage(text_a),
+            "dictionary_coverage_b": phonology.coverage(text_b),
         }

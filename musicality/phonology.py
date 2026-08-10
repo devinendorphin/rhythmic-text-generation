@@ -153,3 +153,26 @@ def sonority_of(phone: str) -> int:
 def has_dictionary() -> bool:
     """True when CMUdict loaded; tools report degraded accuracy otherwise."""
     return bool(_CMU)
+
+
+def coverage(text: str) -> float | None:
+    """Share of tokens in *this text* found in CMUdict. None if no words.
+
+    ``has_dictionary()`` answers "is CMUdict installed" — a property of the
+    install, not of the text. This answers the question that actually
+    qualifies a metric: how much of what we just measured was real
+    pronunciation, and how much was letter-heuristic guesswork.
+
+    The distinction matters most exactly where the toolkit gets used on
+    model output. Every OOV token is scored by ``_heuristic_syllables``,
+    which floors at one syllable and hands out an alternating 1-0 stress
+    guess. A text of vowelless junk ("ptrfw rpdl hdgnf") therefore scans as
+    an unbroken run of stressed monosyllables: stress density 1.0, nPVI 0,
+    entropy 0 — the numbers of a perfect pulse, produced entirely by the
+    fallback. Read any rhythm metric on a low-coverage text as a statement
+    about the fallback until proven otherwise.
+    """
+    ws = words(text)
+    if not ws:
+        return None
+    return round(sum(1 for w in ws if phones_for(w) is not None) / len(ws), 4)

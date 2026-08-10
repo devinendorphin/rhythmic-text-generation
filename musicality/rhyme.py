@@ -49,6 +49,9 @@ class RhymeAnalyzer:
             "assonance_density": assonance,
             "consonance_density": consonance,
             "dictionary_backed": phonology.has_dictionary(),
+            # Coverage of THIS text: low values mean the numbers
+            # above describe the OOV fallback, not pronunciation.
+            "dictionary_coverage": phonology.coverage(text),
         }
 
     @staticmethod

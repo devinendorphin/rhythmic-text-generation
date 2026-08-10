@@ -56,4 +56,7 @@ class SonorityAnalyzer:
             ),
             "contour_preview": contour[:60],
             "dictionary_backed": phonology.has_dictionary(),
+            # Coverage of THIS text: low values mean the numbers
+            # above describe the OOV fallback, not pronunciation.
+            "dictionary_coverage": phonology.coverage(text),
         }

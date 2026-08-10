@@ -63,6 +63,9 @@ class RhythmVariability:
             "periodicity_strength": autocorr.get(dominant_lag) if dominant_lag else None,
             "mean_inter_stress_interval": round(mean(intervals), 4) if intervals else None,
             "dictionary_backed": phonology.has_dictionary(),
+            # Coverage of THIS text: low values mean the numbers
+            # above describe the OOV fallback, not pronunciation.
+            "dictionary_coverage": phonology.coverage(text),
         }
 
     @staticmethod

@@ -13,7 +13,7 @@ out-of-vocabulary words), and a JSON-emitting CLI.
 
 ```bash
 pip install -e ".[dev]"   # installs cmudict + pytest
-python -m pytest tests/   # 18 sanity tests against canonical texts
+python -m pytest tests/   # 42 tests: tool sanity, log ingest, coverage confound
 ```
 
 ## The ten tools
@@ -71,11 +71,29 @@ fingerprint similarities:
 python examples/analyze_extract.py sample.txt -s "word_salad:105-143" -s "coherent:286-350"
 ```
 
-Applied to a Llama 3.1 405B base-model extract, this workflow showed that
-degeneration into nonce-word salad is rhythmically *hyper-regular*, not
-noisy — nPVI drops below metrical verse, stress density approaches 0.8, and
-the invented words keep English onset statistics: phonotactics and pulse
-survive the collapse of semantics.
+Applied to a Llama 3.1 405B base-model extract, this workflow appeared to show
+that degeneration into nonce-word salad is rhythmically *hyper-regular* rather
+than noisy. **That reading was mostly an artifact** — see
+[`FINDINGS.md`](FINDINGS.md). Out-of-vocabulary words are scored by a fallback
+that floors at one syllable with an alternating 1-0 stress guess, so random
+consonant strings score `stress_density 1.0, nPVI 0.0`: a perfect pulse from
+pure noise. Always read `dictionary_coverage` first.
+
+### Analyzing completion-log sweeps
+
+`examples/analyze_sweep.py` reads completion-log JSON exports, bins generations
+by a swept sampling parameter, and prints the metric table per bin against the
+verse/prose baselines *and* two random-noise controls — then reports
+per-generation correlations that separate real effects from the OOV artifact:
+
+```bash
+python examples/analyze_sweep.py examples/generations/*.json --by temperature
+```
+
+The shipped corpus is 350 `davinci-002` generations swept over temperature
+1.0 → 2.0. It shows `r(coverage, stress_density) = -0.81`, and a real but much
+smaller residual: nPVI still falls with temperature among fully in-vocabulary
+text (`r = -0.26`).
 
 ## Research uses
 
@@ -94,5 +112,8 @@ All measures are text-based proxies for phenomena that are ultimately
 acoustic. Stress comes from citation-form lexical entries (no sentence-level
 prosody model); nPVI here uses syllable/interval counts, not durations, so
 compare values within this toolkit rather than against acoustic studies.
-Out-of-vocabulary words fall back to letter heuristics, and each tool
-reports `dictionary_backed` so you can track coverage.
+Out-of-vocabulary words fall back to letter heuristics. Each tool reports
+`dictionary_backed` (is CMUdict installed) **and `dictionary_coverage`** (what
+share of *this text* was actually found in it). The second is the one that
+qualifies a measurement: rhythm metrics on a low-coverage text describe the
+fallback, not the text. See [`FINDINGS.md`](FINDINGS.md).

@@ -64,6 +64,9 @@ class MeterDetector:
             "foot_scores": foot_scores,
             "lines": line_results,
             "dictionary_backed": phonology.has_dictionary(),
+            # Coverage of THIS text: low values mean the numbers
+            # above describe the OOV fallback, not pronunciation.
+            "dictionary_coverage": phonology.coverage(text),
         }
 
     def _scan_line(self, line: str, seq: list[int]) -> dict:

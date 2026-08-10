@@ -50,6 +50,9 @@ class AlliterationAnalyzer:
             "top_onsets": dict(onset_counts.most_common(8)),
             "window_words": WINDOW,
             "dictionary_backed": phonology.has_dictionary(),
+            # Coverage of THIS text: low values mean the numbers
+            # above describe the OOV fallback, not pronunciation.
+            "dictionary_coverage": phonology.coverage(text),
         }
 
     @staticmethod
