@@ -7,9 +7,16 @@ track.
 
 - **`Context_Window.mp4`**: 1080p30, compressed to 28 MB. The film grain is smoothed
   out at this size.
-- **Full-quality master**: 283 MB, with the grain intact. It's attached to the
-  [`context-window-v1` release](../../../../releases/tag/context-window-v1) because git
-  refuses files over 100 MB.
+- **Full-quality master**: 283 MB, with the grain intact. It's in [`master/`](master),
+  split into three parts because git refuses files over 100 MB. To rejoin and verify:
+
+  ```bash
+  cd master
+  cat Context_Window_master.mp4.part0 Context_Window_master.mp4.part1 Context_Window_master.mp4.part2 > Context_Window_master.mp4
+  sha256sum -c SHA256SUMS
+  ```
+
+  On Windows: `copy /b Context_Window_master.mp4.part0 + Context_Window_master.mp4.part1 + Context_Window_master.mp4.part2 Context_Window_master.mp4`
 
 ## What happens
 
